@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from "@/context/AuthContext";
 import { db } from "@/lib/firebase/config";
 import { doc, getDoc, updateDoc, arrayUnion, serverTimestamp, Timestamp, onSnapshot, collection } from "firebase/firestore"; // Import Firestore functions, added collection
-import { Paperclip, Globe, Send, Sparkles, Settings2, RefreshCw, Copy, ThumbsUp, ThumbsDown, ArrowDown, ArrowLeft, Search as SearchIcon } from "lucide-react";
+import { Paperclip, Globe, Send, Sparkles, Settings2, RefreshCw, Copy, ThumbsUp, ThumbsDown, ArrowDown, ArrowLeft, Search as SearchIcon, ChevronDown, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
@@ -21,6 +21,13 @@ import {
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils";
 import ChatMessageSkeleton from "@/components/ChatMessageSkeleton";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Badge } from "@/components/ui/badge"
 
 // Define message type specifically for Firestore data
 interface FirestoreMessage {
@@ -44,39 +51,41 @@ interface AIModel {
   provider: string; // e.g., OpenAI, Google, Anthropic
   description: string;
   icon?: React.ComponentType<{ className?: string }>; // Optional icon component
+  isPro?: boolean; // Optional flag for PRO models
 }
 
 // NOTE: This list needs to correspond to models your BACKEND supports
 const AVAILABLE_MODELS: AIModel[] = [
-  // OpenAI
-  { id: 'gpt-4o-mini', name: 'GPT 4o Mini', provider: 'OpenAI', description: "OpenAI's simple and fast text generation model", icon: Sparkles },
-  { id: 'gpt-4.1-nano', name: 'GPT 4.1 Nano', provider: 'OpenAI', description: "OpenAI's fastest text generation model", icon: Sparkles },
-  { id: 'gpt-4.1', name: 'GPT 4.1', provider: 'OpenAI', description: "OpenAI's flagship model for complex tasks", icon: Sparkles }, // Example from image
-
   // Google
-  { id: 'gemini-1.5-flash-latest', name: 'Gemini 1.5 Flash', provider: 'Google', description: "Google's fast, multimodal model for general tasks", icon: Sparkles },
+  { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', provider: 'Google', description: "Google's most advanced model", icon: Sparkles }, // Placeholder icon
   { id: 'gemini-1.5-pro-latest', name: 'Gemini 1.5 Pro', provider: 'Google', description: "Google's most capable multimodal model", icon: Sparkles },
-  // { id: 'gemini-1.0-pro', name: 'Gemini 1.0 Pro', provider: 'Google', description: "Original Gemini Pro model", icon: Sparkles },
+  { id: 'gemini-1.5-flash-latest', name: 'Gemini 1.5 Flash', provider: 'Google', description: "Google's fast, multimodal model for general tasks", icon: Sparkles },
 
   // Anthropic
-  { id: 'claude-3-haiku-20240307', name: 'Claude 3 Haiku', provider: 'Anthropic', description: "Anthropic's fastest, most compact model", icon: Sparkles },
-  { id: 'claude-3-sonnet-20240229', name: 'Claude 3 Sonnet', provider: 'Anthropic', description: "Balanced intelligence and speed", icon: Sparkles },
+  { id: 'claude-3.7-sonnet', name: 'Claude 3.7 Sonnet', provider: 'Anthropic', description: "Anthropic's latest Sonnet model with PRO features", icon: Sparkles, isPro: true }, // Placeholder icon, added isPro flag
   { id: 'claude-3-opus-20240229', name: 'Claude 3 Opus', provider: 'Anthropic', description: "Anthropic's most powerful model for complex tasks", icon: Sparkles },
+  { id: 'claude-3-sonnet-20240229', name: 'Claude 3 Sonnet', provider: 'Anthropic', description: "Balanced intelligence and speed", icon: Sparkles },
+  { id: 'claude-3-haiku-20240307', name: 'Claude 3 Haiku', provider: 'Anthropic', description: "Anthropic's fastest, most compact model", icon: Sparkles },
 
+  // OpenAI
+  { id: 'gpt-4.1', name: 'GPT 4.1', provider: 'OpenAI', description: "OpenAI's flagship model for complex tasks", icon: Sparkles },
+  { id: 'gpt-4o-mini', name: 'GPT 4o Mini', provider: 'OpenAI', description: "OpenAI's simple and fast text generation model", icon: Sparkles },
+  { id: 'gpt-4.1-nano', name: 'GPT 4.1 Nano', provider: 'OpenAI', description: "OpenAI's fastest text generation model", icon: Sparkles },
+
+  // xAI
+  { id: 'grok-3', name: 'Grok 3', provider: 'xAI', description: "xAI's latest model (via API if available)", icon: Sparkles }, // Placeholder icon
+
+  // DeepSeek
+  { id: 'deepseek-r1', name: 'DeepSeek R1', provider: 'DeepSeek', description: "DeepSeek R1 model (via API)", icon: Sparkles }, // Placeholder icon
+  
   // Llama (Example: via Groq)
-  { id: 'llama3-8b-8192', name: 'Llama 3 8B', provider: 'Groq/Meta', description: "Meta's efficient Llama 3 model (8B parameters)", icon: Sparkles },
   { id: 'llama3-70b-8192', name: 'Llama 3 70B', provider: 'Groq/Meta', description: "Meta's powerful Llama 3 model (70B parameters)", icon: Sparkles },
+  { id: 'llama3-8b-8192', name: 'Llama 3 8B', provider: 'Groq/Meta', description: "Meta's efficient Llama 3 model (8B parameters)", icon: Sparkles },
 
   // Mistral (Example: via Groq or Mistral AI)
-  { id: 'mistral-7b-instruct', name: 'Mistral 7B Instruct', provider: 'Groq/Mistral', description: "Mistral's fast 7B instruction-following model", icon: Sparkles }, 
   { id: 'mixtral-8x7b-instruct', name: 'Mixtral 8x7B Instruct', provider: 'Groq/Mistral', description: "Mistral's high-quality sparse mixture-of-experts model", icon: Sparkles },
-  // { id: 'mistral-large-latest', name: 'Mistral Large', provider: 'Mistral AI', description: "Mistral's top-tier reasoning model", icon: Sparkles }, // If using Mistral API directly
-
-  // Grok (Example: via Groq - if available)
-  { id: 'grok-1', name: 'Grok 1', provider: 'Groq/xAI', description: "xAI's model, focused on real-time information (via Groq)", icon: Sparkles },
-
+  { id: 'mistral-7b-instruct', name: 'Mistral 7B Instruct', provider: 'Groq/Mistral', description: "Mistral's fast 7B instruction-following model", icon: Sparkles }, 
 ];
-// Add more models here as needed
 
 export default function ChatPage() {
   const params = useParams();
@@ -108,6 +117,8 @@ export default function ChatPage() {
   // Simulate User Info
   const userName = "User"; // Fallback
   const userAvatar = "/placeholder.svg?height=40&width=40";
+
+  const [copiedMessageIndex, setCopiedMessageIndex] = useState<number | null>(null); // State for copy feedback
 
   // Fetch initial chat data and listen for updates
   useEffect(() => {
@@ -253,9 +264,88 @@ export default function ChatPage() {
     }
   };
 
+  // Function to handle regeneration with a specific model
+  const handleRegenerate = async (originalUserPrompt: string, regenerationModelId: string, messageIndex: number) => {
+    console.log(`Regenerating response for message ${messageIndex} using model: ${regenerationModelId}`);
+    setIsLoading(true); // Indicate loading during regeneration
+
+    try {
+      const apiResponse = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          prompt: originalUserPrompt,
+          modelId: regenerationModelId // Use the selected regeneration model
+        }),
+      });
+
+      if (!apiResponse.ok) {
+        const errorData = await apiResponse.json();
+        throw new Error(errorData.error || `API error! status: ${apiResponse.status}`);
+      }
+
+      const data = await apiResponse.json();
+      const regeneratedResponseText = data.response;
+      const regenerationModel = AVAILABLE_MODELS.find(m => m.id === regenerationModelId) || { name: regenerationModelId }; // Find model details
+
+      const updatedAiMessage: FirestoreMessage = {
+        sender: "ai",
+        text: regeneratedResponseText,
+        model: regenerationModel.name, // Use the regeneration model's name
+        timestamp: Timestamp.now() // Update timestamp
+      };
+
+      // Update the specific message in the state
+      const updatedMessages = [...messages];
+      updatedMessages[messageIndex + 1] = updatedAiMessage; // Assuming AI message is always after user message
+      setMessages(updatedMessages);
+
+      // Also update Firestore (replace the old AI message)
+      if (user?.email && chatId) {
+        const chatDocPath = `savedHistory/${user.email}/chats/${chatId}`;
+        const chatDocRef = doc(db, chatDocPath);
+        // Fetch the doc, modify the array, and update
+        const docSnap = await getDoc(chatDocRef);
+        if (docSnap.exists()) {
+          const chatData = docSnap.data() as ChatData;
+          const firestoreMessages = chatData.messages || [];
+          if (firestoreMessages[messageIndex + 1]?.sender === 'ai') {
+            firestoreMessages[messageIndex + 1] = updatedAiMessage;
+            await updateDoc(chatDocRef, { messages: firestoreMessages });
+            console.log("Firestore message updated successfully.");
+          }
+        }
+      }
+
+    } catch (error) {
+      console.error("Error regenerating AI response:", error);
+      // Optionally update the message with an error indicator
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Function to handle copying text
+  const handleCopy = (text: string, index: number) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedMessageIndex(index); // Set index for feedback
+      setTimeout(() => setCopiedMessageIndex(null), 1500); // Reset after 1.5 seconds
+    }).catch(err => {
+      console.error('Failed to copy text: ', err);
+      // Optionally show an error message to the user
+    });
+  };
+
   // Render Loading/Content
   if (authLoading || isFetchingChat) {
-     return <div className="flex flex-grow items-center justify-center">Loading Chat...</div>;
+     return (
+       <div className="flex flex-grow flex-col items-center justify-center p-6">
+         <div className="w-full max-w-3xl space-y-4">
+           <ChatMessageSkeleton />
+           <ChatMessageSkeleton />
+         </div>
+       </div>
+     );
   }
 
   if (!user || !user.email) {
@@ -291,7 +381,12 @@ export default function ChatPage() {
               <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                 {msg.sender === 'user' ? (
                   <div className="w-full h-full bg-gray-200 rounded-full overflow-hidden">
-                    <Image src={userAvatar} alt={user.displayName || userName} width={32} height={32} />
+                    <Image 
+                      src={user.photoURL || userAvatar} 
+                      alt={user.displayName || userName} 
+                      width={32} 
+                      height={32} 
+                    />
                   </div>
                 ) : (
                   <div className="w-full h-full bg-indigo-100 rounded-full flex items-center justify-center">
@@ -320,13 +415,46 @@ export default function ChatPage() {
                    {/* AI Actions - Adjusted margin/padding */}
                    {msg.sender === 'ai' && (
                        <div className="flex items-center mt-2 pt-2 border-t border-gray-100">
-                            <div className="flex gap-1">
-                              <Button variant="ghost" size="icon" className="h-7 w-7 text-gray-500 hover:bg-gray-100"><Copy className="h-4 w-4"/></Button>
-                              <Button variant="ghost" size="icon" className="h-7 w-7 text-gray-500 hover:bg-gray-100"><RefreshCw className="h-4 w-4"/></Button>
-                            </div>
-                            <div className="flex gap-1 ml-auto">
-                              <Button variant="ghost" size="icon" className="h-7 w-7 text-gray-500 hover:bg-gray-100"><ThumbsUp className="h-4 w-4"/></Button>
-                              <Button variant="ghost" size="icon" className="h-7 w-7 text-gray-500 hover:bg-gray-100"><ThumbsDown className="h-4 w-4"/></Button>
+                            <div className="flex gap-2">
+                                 <Button 
+                                   variant="ghost" 
+                                   size="icon" 
+                                   className="h-7 w-7 text-gray-500 hover:bg-gray-100"
+                                   onClick={() => handleCopy(msg.text, index)}
+                                 >
+                                   {copiedMessageIndex === index ? <Check className="h-4 w-4 text-green-600"/> : <Copy className="h-4 w-4"/>}
+                                 </Button>
+                                 
+                                 {/* Enhanced Regenerate Button */}
+                                 <DropdownMenu>
+                                   <DropdownMenuTrigger asChild>
+                                     <Button variant="ghost" size="icon" className="h-7 w-7 text-gray-500 hover:bg-gray-100 flex items-center">
+                                       <RefreshCw className="h-4 w-4"/>
+                                       <ChevronDown className="h-3 w-3 ml-0.5" />
+                                     </Button>
+                                   </DropdownMenuTrigger>
+                                   <DropdownMenuContent align="start">
+                                     <DropdownMenuItem onClick={() => handleRegenerate(messages[index - 1].text, selectedModelId, index - 1)}>
+                                       Regenerate (Current: {selectedModel.name})
+                                     </DropdownMenuItem>
+                                     {AVAILABLE_MODELS.map((model) => (
+                                       <DropdownMenuItem key={model.id} onClick={() => handleRegenerate(messages[index - 1].text, model.id, index - 1)}>
+                                          <div className="flex items-center justify-between w-full">
+                                             <span className="flex items-center">
+                                               {model.icon && <model.icon className="h-4 w-4 mr-2"/>} 
+                                               {model.name}
+                                             </span>
+                                             {model.isPro && <Badge variant="outline" className="ml-2 px-1.5 py-0 text-xs font-semibold border-purple-600 text-purple-600">PRO</Badge>}
+                                          </div>
+                                       </DropdownMenuItem>
+                                     ))}
+                                   </DropdownMenuContent>
+                                 </DropdownMenu>
+
+                                 <div className="flex gap-1 ml-auto">
+                                   <Button variant="ghost" size="icon" className="h-7 w-7 text-gray-500 hover:bg-gray-100"><ThumbsUp className="h-4 w-4"/></Button>
+                                   <Button variant="ghost" size="icon" className="h-7 w-7 text-gray-500 hover:bg-gray-100"><ThumbsDown className="h-4 w-4"/></Button>
+                                 </div>
                             </div>
                        </div>
                    )}
@@ -345,23 +473,20 @@ export default function ChatPage() {
       </div>
 
       {/* Fixed Input Area */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 border-t bg-white">
-         <div className="relative w-full max-w-4xl mx-auto shadow-sm rounded-xl border bg-white">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-white via-white/90 to-transparent">
+         <div className="relative w-full max-w-4xl mx-auto shadow-lg rounded-2xl border border-gray-200/80 bg-white">
            {/* Textarea */}
-           <Textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} onKeyDown={handleKeyDown} placeholder="Type your prompt here..." rows={1} className="w-full p-4 pr-12 rounded-t-xl resize-none focus:outline-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"/>
-           {/* Controls - Updated */}
-           <div className="flex items-center justify-between p-3 border-t">
+           <Textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} onKeyDown={handleKeyDown} placeholder="Type your prompt here..." rows={1} className="w-full p-4 pr-12 rounded-t-2xl resize-none focus:outline-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none text-base text-gray-900 bg-transparent"/>
+           {/* Controls - Updated - Removed border-t */}
+           <div className="flex items-center justify-between p-3 bg-white/80 backdrop-blur-sm rounded-b-2xl">
                {/* Left controls */}
                <div className="flex items-center space-x-4">
-                    <button className="p-1.5 hover:bg-gray-100 rounded-full"><Paperclip className="h-5 w-5 text-gray-500" /></button>
-                    <div className="flex items-center space-x-1 px-2 py-1 rounded-full hover:bg-gray-100 cursor-pointer"><Globe className="h-5 w-5 text-blue-500" /> <span className="text-sm">Web</span></div>
-                    
-                    {/* --- Model Selector Trigger --- */}
+                    <button className="p-1.5 hover:bg-gray-100 rounded-full"><Paperclip className="h-5 w-5 text-gray-400" /></button>
                     <Dialog open={isModelSelectOpen} onOpenChange={setIsModelSelectOpen}>
                       <DialogTrigger asChild>
-                        <button className="flex items-center space-x-1 px-2 py-1 rounded-full hover:bg-gray-100 cursor-pointer">
+                        <button className="flex items-center space-x-2 px-3 py-1 rounded-full bg-gray-100 hover:bg-gray-200 cursor-pointer text-sm font-medium text-gray-700">
                           {selectedModel.icon && <selectedModel.icon className="h-5 w-5 text-blue-500"/>}
-                          <span className="text-sm">{selectedModel.name}</span>
+                          <span>{selectedModel.name}</span>
                         </button>
                       </DialogTrigger>
                       <DialogContent className="sm:max-w-[600px] p-0">
@@ -409,8 +534,23 @@ export default function ChatPage() {
                </div>
                {/* Right controls */}
                <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-2"><Settings2 className="h-5 w-5 text-gray-500"/><span className="text-sm text-gray-600">Kira Magic</span><div className="w-10 h-5 bg-gray-200 rounded-full relative cursor-pointer"><div className="absolute inset-y-0 left-0 w-5 h-5 bg-white rounded-full shadow"></div></div></div>
-                    <Button onClick={handleSend} size="icon" className="bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-full w-8 h-8" disabled={isLoading}><Send className="h-4 w-4" /></Button>
+                    <Button 
+                      onClick={handleSend} 
+                      size="icon" 
+                      className={cn(
+                        "rounded-full w-10 h-10 transition",
+                        prompt.trim() ? "bg-black text-white hover:bg-gray-900" : "bg-gray-200 text-gray-400 hover:bg-gray-200 cursor-not-allowed"
+                      )} 
+                      disabled={isLoading || !prompt.trim()}
+                    >
+                      {isLoading ? (
+                        <span className="flex items-center justify-center w-5 h-5">
+                          <span className="animate-bounce inline-block w-2 h-2 bg-gray-400 rounded-full mr-1"></span>
+                          <span className="animate-bounce inline-block w-2 h-2 bg-gray-400 rounded-full mr-1" style={{ animationDelay: '0.1s' }}></span>
+                          <span className="animate-bounce inline-block w-2 h-2 bg-gray-400 rounded-full" style={{ animationDelay: '0.2s' }}></span>
+                        </span>
+                      ) : <Send className="h-5 w-5" />}
+                    </Button>
                 </div>
            </div>
           </div>

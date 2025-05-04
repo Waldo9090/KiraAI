@@ -6,9 +6,10 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { db } from '@/lib/firebase/config';
 import { collection, query, where, orderBy, onSnapshot, Timestamp } from 'firebase/firestore';
-import { SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarMenuSkeleton } from '@/components/ui/sidebar'; // Assuming sidebar components are available
-import { MessageSquare } from 'lucide-react'; // Or another suitable icon
-import { cn } from '@/lib/utils'; // For conditional classes
+import { MessageSquare } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface ChatHistoryItem {
   id: string;
@@ -16,11 +17,17 @@ interface ChatHistoryItem {
   createdAt: Timestamp;
 }
 
-export default function ChatHistorySidebar() {
+// Define Props for the component
+interface ChatHistorySidebarProps {
+  selectedChatIds: string[];
+  onSelectionChange: (chatId: string, isSelected: boolean) => void;
+}
+
+export default function ChatHistorySidebar({ selectedChatIds, onSelectionChange }: ChatHistorySidebarProps) {
   const { user, loading: authLoading } = useAuth();
   const [chatHistory, setChatHistory] = useState<ChatHistoryItem[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
-  const pathname = usePathname(); // To highlight the active chat
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!user || !user.email) {
@@ -63,69 +70,77 @@ export default function ChatHistorySidebar() {
     return () => unsubscribe();
   }, [user]); // Re-run when user changes
 
-  // --- Render Logic ---
+  // Skeleton Loader for Auth or History Loading
+  const renderSkeletons = (count = 3) => (
+    <div className="space-y-1 p-2">
+      {[...Array(count)].map((_, i) => (
+        <div key={i} className="flex items-center space-x-3 p-2">
+          <Skeleton className="h-4 w-4 rounded" />
+          <Skeleton className="h-3 w-full rounded" />
+        </div>
+      ))}
+    </div>
+  );
 
-  if (authLoading) {
-    // Show skeletons while auth is loading
-    return (
-      <SidebarMenu>
-        {[...Array(3)].map((_, i) => (
-          <SidebarMenuItem key={i}>
-            <SidebarMenuSkeleton showIcon />
-          </SidebarMenuItem>
-        ))}
-      </SidebarMenu>
-    );
-  }
-
-  if (isLoadingHistory) {
-     // Show skeletons specifically for history loading
-     return (
-       <SidebarMenu>
-         {[...Array(3)].map((_, i) => (
-           <SidebarMenuItem key={i}>
-             <SidebarMenuSkeleton showIcon />
-           </SidebarMenuItem>
-         ))}
-       </SidebarMenu>
-     );
+  if (authLoading || isLoadingHistory) {
+    return renderSkeletons();
   }
 
   if (!user) {
-    return null; // Don't render history if not logged in
+    return null;
   }
 
   return (
-    <SidebarMenu>
-      {chatHistory.length === 0 && !isLoadingHistory && (
-        <SidebarMenuItem>
+    <ul className="flex w-full min-w-0 flex-col gap-1 p-2">
+      {chatHistory.length === 0 && (
+        <li>
           <div className="px-2 py-4 text-center text-xs text-gray-500">
             No chat history yet.
           </div>
-        </SidebarMenuItem>
+        </li>
       )}
       {chatHistory.map((chat) => {
-        const isActive = pathname === `/chat/${chat.id}`;
-        // Fallback for missing/empty title
+        const isActive = pathname === `/dashboard/chat/${chat.id}`;
         const chatTitle = chat.title && chat.title.trim() ? chat.title : 'Untitled';
         return (
-          <SidebarMenuItem key={chat.id}>
-            <Link href={`/chat/${chat.id}`} passHref legacyBehavior>
-              <SidebarMenuButton
-                isActive={isActive}
-                className={cn(
-                  "hover:bg-gray-100 active:bg-gray-200 w-full justify-start",
-                  isActive && "bg-gray-100 font-medium" // Example active style
-                )}
-                tooltip={chatTitle} // Show full title on hover when collapsed
-              >
-                <MessageSquare className="h-4 w-4 mr-3 flex-shrink-0 text-gray-600" />
-                <span className="truncate text-xs">{chatTitle}</span>
-              </SidebarMenuButton>
+          <li key={chat.id}>
+            <Link 
+              href={`/dashboard/chat/${chat.id}`}
+              title={chatTitle}
+              onClick={(e) => e.preventDefault()}
+              className={cn(
+                "flex w-full items-center gap-3 overflow-hidden rounded-md p-2 text-left text-xs group",
+                "hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700",
+                isActive 
+                  ? "bg-gray-100 dark:bg-gray-800 font-medium text-gray-900 dark:text-white"
+                  : "text-gray-700 dark:text-gray-400",
+                "disabled:pointer-events-none disabled:opacity-50 relative"
+              )}
+            >
+              <Checkbox
+                  id={`select-${chat.id}`}
+                  checked={selectedChatIds.includes(chat.id)}
+                  onCheckedChange={(checked) => onSelectionChange(chat.id, !!checked)}
+                  onClick={(e) => e.stopPropagation()}
+                  className={cn(
+                      "absolute left-2 top-1/2 -translate-y-1/2 transition-opacity",
+                      selectedChatIds.includes(chat.id) ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                  )}
+                  aria-label={`Select chat ${chatTitle}`}
+              />
+              <MessageSquare 
+                 className={cn(
+                    "h-4 w-4 flex-shrink-0 text-gray-600 dark:text-gray-400 transition-opacity",
+                    selectedChatIds.includes(chat.id) ? "opacity-0" : "opacity-100 group-hover:opacity-0"
+                 )}
+              />
+              <span className={cn("truncate transition-all pl-0", selectedChatIds.includes(chat.id) || "group-hover:pl-6")}>
+                {chatTitle}
+              </span>
             </Link>
-          </SidebarMenuItem>
+          </li>
         );
       })}
-    </SidebarMenu>
+    </ul>
   );
 } 

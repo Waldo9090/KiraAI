@@ -7,17 +7,20 @@ import { auth } from '@/lib/firebase/config'; // Adjust path if needed
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  photoURL: string | null;
 }
 
-const AuthContext = createContext<AuthContextType>({ user: null, loading: true });
+const AuthContext = createContext<AuthContextType>({ user: null, loading: true, photoURL: null });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [photoURL, setPhotoURL] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      setPhotoURL(currentUser?.photoURL || null);
       setLoading(false);
     });
 
@@ -26,7 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={{ user, loading, photoURL }}>
       {children}
     </AuthContext.Provider>
   );
