@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect, useContext } from "react";
 import { X, FileText, Search as SearchIcon } from "lucide-react";
 import { PromptPasteContext } from "@/app/dashboard/layout";
