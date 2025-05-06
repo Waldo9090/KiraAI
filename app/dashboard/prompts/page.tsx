@@ -1,3 +1,5 @@
+"use client";
+
 import PromptsPanel from "@/components/PromptsPanel";
 
 export default function PromptsPage() {
