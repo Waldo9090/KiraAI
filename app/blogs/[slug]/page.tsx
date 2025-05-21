@@ -5,13 +5,14 @@ import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 import SharedNav from "../../shared-nav"
 import { BLOG_POSTS_CONTENT } from "./content"
+import ReactMarkdown from 'react-markdown'
 
 export default function BlogPost() {
   const params = useParams()
   const slug = params.slug as string
-  const content = BLOG_POSTS_CONTENT[slug]
+  const post = BLOG_POSTS_CONTENT[slug]
 
-  if (!content) {
+  if (!post) {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-950">
         <SharedNav />
@@ -36,11 +37,22 @@ export default function BlogPost() {
           Back to Blog
         </Link>
 
+        {/* Blog Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">{post.title}</h1>
+          <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+            <span>{post.date}</span>
+            <span>•</span>
+            <span>{post.readTime}</span>
+            <span>•</span>
+            <span>{post.category}</span>
+          </div>
+        </div>
+
         {/* Blog Content */}
-        <article 
-          className="prose dark:prose-invert max-w-none"
-          dangerouslySetInnerHTML={{ __html: content }}
-        />
+        <article className="prose prose-lg dark:prose-invert max-w-none">
+          <ReactMarkdown>{post.content}</ReactMarkdown>
+        </article>
       </main>
     </div>
   )
