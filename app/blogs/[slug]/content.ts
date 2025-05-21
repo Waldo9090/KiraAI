@@ -157,7 +157,7 @@ Office Hours: Tuesday, 2-4 PM
     metaTitle: "How to End an Email to a Professor: Professional Guide & Examples",
     metaDescription: "Learn the best practices for ending emails to professors with professional closing phrases, real examples, and expert tips for maintaining academic etiquette."
   },
-  "chatgpt-netherlands": {
+  "how-to-use-chat-gpt-in-netherlands": {
     title: "How to Use ChatGPT in the Netherlands: Your Complete Guide",
     date: "March 14, 2024",
     readTime: "4 min read",
@@ -315,7 +315,7 @@ Access to powerful AI tools shouldn't be limited by location. ChatAI ensures Dut
     metaTitle: "How to Use ChatGPT in the Netherlands: Complete Guide & Local Tips",
     metaDescription: "Learn how to access and use ChatGPT in the Netherlands effectively, including Dutch language support, EU compliance, and local best practices."
   },
-  "gpt4o-free": {
+  "chatgpt-4o-free-how-to-use-gpt-4o": {
     title: "Get GPT-4o Free: Your Guide to Advanced AI Without the Price Tag",
     date: "March 13, 2024",
     readTime: "6 min read",
