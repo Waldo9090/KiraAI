@@ -1,8 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { onAuthStateChanged, User } from 'firebase/auth';
-import { auth } from '@/lib/firebase/config'; // Adjust path if needed
+import { onAuthStateChanged, User, Auth } from 'firebase/auth';
+import { auth as firebaseAuth } from '@/lib/firebase/config';
 
 interface AuthContextType {
   user: User | null;
@@ -18,7 +18,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [photoURL, setPhotoURL] = useState<string | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    // Only run auth state observer on the client side
+    if (typeof window === 'undefined') {
+      setLoading(false);
+      return;
+    }
+
+    // Skip if auth is not initialized (server-side or missing config)
+    if (!firebaseAuth) {
+      setLoading(false);
+      return;
+    }
+
+    const unsubscribe = onAuthStateChanged(firebaseAuth, (currentUser) => {
       console.log("AuthContext: onAuthStateChanged fired. User:", currentUser);
       setUser(currentUser);
       setPhotoURL(currentUser?.photoURL || null);
