@@ -8,6 +8,7 @@ import { db } from "@/lib/firebase/config";
 import { collection, query, onSnapshot, orderBy, Timestamp } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 const COMMUNITY_PROMPTS = [
   {
@@ -80,6 +81,7 @@ export default function PromptsPanel({ onClose, isStandalonePage = false }: Prom
   const [isLoadingSaved, setIsLoadingSaved] = useState(false);
   const { user } = useAuth();
   const { pastePrompt } = useContext(PromptPasteContext);
+  const router = useRouter();
 
   useEffect(() => {
     if (activeTab !== 'saved' || !user || !user.email) {
@@ -119,9 +121,20 @@ export default function PromptsPanel({ onClose, isStandalonePage = false }: Prom
   const promptsToShow = activeTab === 'community' ? filteredCommunityPrompts : filteredSavedPrompts;
   const isLoading = activeTab === 'saved' && isLoadingSaved;
 
+  const handlePromptClick = (promptText: string) => {
+    // First paste the prompt using context
+    pastePrompt(promptText);
+    
+    // Then navigate to chat if not already there
+    const currentPath = window.location.pathname;
+    if (!currentPath.startsWith('/chat')) {
+      router.push('/chat');
+    }
+  };
+
   return (
     <div className={cn(
-        "flex flex-col h-full bg-white dark:bg-gray-900 w-[380px] border-l flex-shrink-0 dark:border-gray-800",
+        "flex flex-col h-full bg-white w-[380px] border-r flex-shrink-0 dark:bg-gray-900 dark:border-gray-800",
         isStandalonePage && "some-other-classes-if-needed"
      )}>
       <div className="flex items-center justify-between p-4 border-b bg-white sticky top-0 z-10 dark:bg-gray-900 dark:border-gray-800">
@@ -181,7 +194,7 @@ export default function PromptsPanel({ onClose, isStandalonePage = false }: Prom
           <li key={`comm-${idx}`}>
             <button
               className="w-full text-left py-4 px-2 focus:outline-none hover:bg-gray-50 dark:hover:bg-gray-800 transition rounded-none"
-              onClick={() => pastePrompt(prompt.text)}
+              onClick={() => handlePromptClick(prompt.text)}
             >
               <div className="font-semibold text-gray-900 dark:text-gray-100 mb-1 text-base">{prompt.title}</div>
               <div className="text-sm text-gray-500 dark:text-gray-400 mb-1 leading-snug">{prompt.text}</div>
@@ -197,7 +210,7 @@ export default function PromptsPanel({ onClose, isStandalonePage = false }: Prom
           <li key={prompt.id}>
              <button
                className="w-full text-left py-4 px-2 focus:outline-none hover:bg-gray-50 dark:hover:bg-gray-800 transition rounded-none"
-               onClick={() => pastePrompt(prompt.prompt)}
+               onClick={() => handlePromptClick(prompt.prompt)}
                title={prompt.prompt}
              >
                <div className="text-sm text-gray-800 dark:text-gray-200 mb-1 leading-snug truncate">{prompt.prompt}</div>

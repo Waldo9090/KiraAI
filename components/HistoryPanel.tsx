@@ -50,7 +50,7 @@ export default function HistoryPanel({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white w-[380px] border-l flex-shrink-0 dark:bg-gray-900 dark:border-gray-800">
+    <div className="flex flex-col h-full bg-white w-[380px] border-r flex-shrink-0 dark:bg-gray-900 dark:border-gray-800">
       {/* Header - Make sticky */}
       <div className="flex items-center justify-between p-4 border-b sticky top-0 bg-white dark:bg-gray-900 dark:border-gray-800 z-10">
         <div className="flex items-center gap-2">

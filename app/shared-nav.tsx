@@ -45,6 +45,9 @@ export default function SharedNav() {
             <Link href="/pricing" className="text-gray-700 dark:text-gray-200 hover:opacity-80">
               Pricing
             </Link>
+            <Link href="/blogs" className="text-gray-700 dark:text-gray-200 hover:opacity-80">
+              Blog
+            </Link>
             {/* <Link href="/chat" className="text-gray-700 dark:text-gray-200 hover:opacity-80">
               Kira
             </Link> */}

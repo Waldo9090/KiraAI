@@ -9,15 +9,29 @@ import UsagePopup from "@/components/UsagePopup";
 import { Plus, Zap } from "lucide-react";
 
 interface DashboardHeaderProps {
-  pageTitle: string;
+  title: string;
+  onToggleHistory: () => void;
+  onTogglePrompts: () => void;
+  onToggleTools: () => void;
+  showHistory: boolean;
+  showPrompts: boolean;
+  showTools: boolean;
 }
 
-export default function DashboardHeader({ pageTitle }: DashboardHeaderProps) {
+export default function DashboardHeader({ 
+  title,
+  onToggleHistory, 
+  onTogglePrompts, 
+  onToggleTools, 
+  showHistory, 
+  showPrompts, 
+  showTools 
+}: DashboardHeaderProps) {
   const { queriesRemaining } = useUsage(); // Call useUsage here
 
   return (
     <header className="flex items-center justify-between px-6 py-3 border-b dark:border-gray-800 h-16 flex-shrink-0 bg-white dark:bg-gray-950 sticky top-0 z-20">
-      <span className="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate" title={pageTitle}>{pageTitle}</span>
+      <span className="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate" title={title}>{title}</span>
       <div className="flex items-center gap-4">
         {/* Usage Display & Popover Trigger */}
         <Popover>
@@ -32,7 +46,7 @@ export default function DashboardHeader({ pageTitle }: DashboardHeaderProps) {
           </PopoverContent>
         </Popover>
         {/* End Usage Display */}
-        <Link href="/dashboard/new" passHref>
+        <Link href="/chat" passHref>
           <Button size="sm">
             <Plus className="h-4 w-4 mr-1.5" />
             New Chat

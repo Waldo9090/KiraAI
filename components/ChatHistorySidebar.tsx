@@ -126,15 +126,13 @@ export default function ChatHistorySidebar({ selectedChatIds, onSelectionChange 
 
             {/* Link (now separate) */}
             <Link
-              href={`/dashboard/chat/${chat.id}`}
-              title={chatTitle}
+              key={chat.id}
+              href={`/chat/${chat.id}`}
               className={cn(
-                "flex flex-1 items-center gap-3 overflow-hidden p-2 text-left text-xs", // Use flex-1 to fill space
-                "active:bg-gray-200 dark:active:bg-gray-700",
-                isActive
-                  ? "bg-gray-100 dark:bg-gray-800 font-medium text-gray-900 dark:text-white"
-                  : "text-gray-700 dark:text-gray-400",
-                "disabled:pointer-events-none disabled:opacity-50 relative"
+                "block px-2 py-2 text-sm rounded-md transition-colors",
+                selectedChatIds.includes(chat.id)
+                  ? "bg-gray-100 dark:bg-gray-800"
+                  : "hover:bg-gray-50 dark:hover:bg-gray-800"
               )}
             >
               {/* Icon (conditionally shown based on selection/hover) */}
