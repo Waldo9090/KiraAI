@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import SharedNav from "../shared-nav"
+import { BLOG_POSTS_CONTENT } from "./[slug]/content"
 
 interface BlogPost {
   slug: string
@@ -13,51 +14,18 @@ interface BlogPost {
   description: string
 }
 
-export const BLOG_POSTS: BlogPost[] = [
-  {
-    slug: "how-to-end-an-email-to-a-professor",
-    title: "How to End an Email to a Professor: Best Practices & Examples",
-    date: "May 20, 2025",
-    readTime: "6 min read",
-    category: "Writing",
-    description: "Learn professional ways to end emails to professors with examples, templates, and best practices. Get tips for formal closings that leave a lasting impression."
-  },
-  {
-    slug: "what-does-gpt-stand-for-in-chat-gpt",
-    title: "GPT Full Form: What Does GPT Stand for in ChatGPT?",
-    date: "May 20, 2025",
-    readTime: "10 min",
-    category: "AI Technology",
-    description: "Understand the meaning behind GPT in ChatGPT, exploring its components, evolution, and capabilities in this comprehensive guide."
-  },
-  {
-    slug: "how-to-use-chat-gpt-in-netherlands",
-    title: "How to Use ChatGPT in the Netherlands with ChatAI",
-    date: "May 20, 2025",
-    readTime: "8 min",
-    category: "Tutorials",
-    description: "Learn how to access and use ChatGPT in the Netherlands through ChatAI, with Dutch language support and region-free access."
-  },
-  {
-    slug: "chatgpt-4o-free-how-to-use-gpt-4o",
-    title: "Get GPT-4o Free: How to Use ChatGPT-4o Without Paying",
-    date: "May 20, 2025",
-    readTime: "8 min read",
-    category: "Tutorials",
-    description: "Learn how to access GPT-4o for free through ChatAI. Get unlimited access to OpenAI's most advanced multimodal AI model without spending a cent."
-  },
-  {
-    slug: "best-chatgpt-alternative-in-china",
-    title: "The Best ChatGPT Alternative in China",
-    date: "May 20, 2025",
-    readTime: "6 min",
-    category: "AI Tools",
-    description: "Discover ChatAI - the leading ChatGPT alternative for users in China, offering full GPT-4 capabilities without VPN requirements."
-  }
-];
-
 export default function BlogsPage() {
   const router = useRouter()
+
+  // Convert the content object into an array with slugs
+  const blogPosts = Object.entries(BLOG_POSTS_CONTENT).map(([slug, post]) => ({
+    slug,
+    title: post.title,
+    date: post.date,
+    readTime: post.readTime,
+    category: post.category,
+    description: post.description
+  }));
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">
@@ -68,7 +36,7 @@ export default function BlogsPage() {
 
         {/* Blog Posts List */}
         <div className="space-y-12">
-          {BLOG_POSTS.map((post) => (
+          {blogPosts.map((post) => (
             <article 
               key={post.slug}
               className="group border-b border-gray-200 dark:border-gray-800 pb-8 last:border-0"
