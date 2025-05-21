@@ -1,59 +1,80 @@
-"use client"
+import Link from "next/link";
+// import { ArrowLeft } from "lucide-react"; // Still commented out for isolation
+// import SharedNav from "../../shared-nav"; // Still commented out for isolation
+import { BLOG_POSTS_CONTENT } from '@/app/blogs/[slug]/content';
+// import { Metadata } from 'next'; // Temporarily commented out
+import { notFound } from 'next/navigation';
+import BlogPostClient from './BlogPostClient'; // Import the client component
 
-import { useParams } from "next/navigation"
-import Link from "next/link"
-import { ArrowLeft } from "lucide-react"
-import SharedNav from "../../shared-nav"
-import { BLOG_POSTS_CONTENT } from "./content"
-import ReactMarkdown from 'react-markdown'
+// Define the structure of a blog post (can be shared or defined in content.ts as well)
+interface BlogPostData {
+  title: string;
+  date: string;
+  readTime: string;
+  category: string;
+  author: string;
+  content: string;
+  description: string;
+  keywords: string[];
+  metaTitle: string;
+  metaDescription: string;
+}
 
-export default function BlogPost() {
-  const params = useParams()
-  const slug = params.slug as string
-  const post = BLOG_POSTS_CONTENT[slug]
+interface Props {
+  params: {
+    slug: string;
+  };
+}
+
+// Generate static paths for all blog posts (Server-side)
+export async function generateStaticParams() {
+  return Object.keys(BLOG_POSTS_CONTENT).map((slug) => ({
+    slug,
+  }));
+}
+
+/* // Temporarily commented out to resolve build error
+// Generate metadata for the page (Server-side)
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const post = BLOG_POSTS_CONTENT[params.slug] as BlogPostData | undefined;
+  
+  if (!post) {
+    return {
+      title: 'Blog Post Not Found',
+    };
+  }
+
+  return {
+    title: post.metaTitle,
+    description: post.metaDescription,
+    keywords: post.keywords,
+  };
+}
+*/
+
+// This is the Server Component for the page
+export default function BlogPostPage({ params }: Props) {
+  const post = BLOG_POSTS_CONTENT[params.slug] as BlogPostData | undefined;
 
   if (!post) {
-    return (
-      <div className="min-h-screen bg-white dark:bg-gray-950">
-        <SharedNav />
-        <main className="max-w-3xl mx-auto px-4 py-12">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Blog Post Not Found</h1>
-        </main>
-      </div>
-    )
+    notFound(); // Triggers the not-found page
   }
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">
-      <SharedNav />
+      {/* <SharedNav /> */}{/* Temporarily commented out */}
       
-      <main className="max-w-3xl mx-auto px-4 py-12">
-        {/* Back Button */}
-        <Link 
-          href="/blogs" 
-          className="inline-flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 mb-8"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Blog
-        </Link>
+      <main className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <Link href="/blogs" className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 mb-8">
+            {/* <ArrowLeft className="h-4 w-4 mr-2" /> */}{/* Temporarily commented out */}
+            Back to Blogs
+          </Link>
 
-        {/* Blog Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">{post.title}</h1>
-          <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-            <span>{post.date}</span>
-            <span>•</span>
-            <span>{post.readTime}</span>
-            <span>•</span>
-            <span>{post.category}</span>
-          </div>
+          {/* Render the Client Component, passing the fetched post data */}
+          <BlogPostClient post={post} />
         </div>
-
-        {/* Blog Content */}
-        <article className="prose prose-lg dark:prose-invert max-w-none">
-          <ReactMarkdown>{post.content}</ReactMarkdown>
-        </article>
       </main>
     </div>
-  )
+  );
 } 
