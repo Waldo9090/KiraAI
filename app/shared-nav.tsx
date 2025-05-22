@@ -94,8 +94,14 @@ export default function SharedNav() {
             <button className="px-3 py-1 rounded-md font-medium text-gray-800 dark:text-white group-hover:bg-purple-100 dark:group-hover:bg-purple-800/50 transition flex items-center">
               AI Study <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
             </button>
-            <div className="absolute left-0 mt-2 w-40 bg-white dark:bg-gray-900 rounded shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition z-50">
+            <div className="absolute left-0 mt-2 w-56 bg-white dark:bg-gray-900 rounded shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition z-50">
               <Link href="/study" className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">Study Home</Link>
+              <Link href="/ai-translator" className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">AI Translator</Link>
+              <Link href="/math-solver" className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">Math Solver</Link>
+              <Link href="/flashcard-maker" className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">Flashcard Maker</Link>
+              <Link href="/math-homework-assistant" className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">Math Homework Assistant</Link>
+              <Link href="/physics-solver" className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">Physics Solver</Link>
+              <Link href="/quiz-generator" className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">Quiz Generator</Link>
               <Link href="/study/flashcards" className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">Flashcards</Link>
               <Link href="/study/notes" className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">Notes</Link>
             </div>
