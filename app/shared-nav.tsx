@@ -54,6 +54,77 @@ export default function SharedNav() {
           </nav>
         </div>
 
+        {/* --- New AI Tools Nav Bar --- */}
+        <div className="hidden md:flex items-center space-x-2 mr-4">
+          {/* AI Chat Dropdown */}
+          <div className="relative group">
+            <button className="px-3 py-1 rounded-md font-medium text-gray-800 dark:text-white bg-purple-100 dark:bg-purple-900/30 group-hover:bg-purple-200 dark:group-hover:bg-purple-800/50 transition flex items-center">
+              AI Chat <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+            </button>
+            <div className="absolute left-0 mt-2 w-40 bg-white dark:bg-gray-900 rounded shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition z-50">
+              <Link href="/chat" className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">Chat Home</Link>
+              <Link href="/chat/new" className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">New Chat</Link>
+            </div>
+          </div>
+          {/* AI PDF Dropdown */}
+          <div className="relative group">
+            <button className="px-3 py-1 rounded-md font-medium text-gray-800 dark:text-white group-hover:bg-purple-100 dark:group-hover:bg-purple-800/50 transition flex items-center">
+              AI PDF <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+            </button>
+            <div className="absolute left-0 mt-2 w-40 bg-white dark:bg-gray-900 rounded shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition z-50">
+              <Link href="/pdf" className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">PDF Home</Link>
+              <Link href="/pdf/summarize" className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">Summarize PDF</Link>
+            </div>
+          </div>
+          {/* AI YouTube */}
+          <Link href="/youtube" className="px-3 py-1 rounded-md font-medium text-gray-800 dark:text-white hover:bg-purple-100 dark:hover:bg-purple-800/50 transition">AI YouTube</Link>
+          {/* AI Writer Dropdown */}
+          <div className="relative group">
+            <button className="px-3 py-1 rounded-md font-medium text-gray-800 dark:text-white group-hover:bg-purple-100 dark:group-hover:bg-purple-800/50 transition flex items-center">
+              AI Writer <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+            </button>
+            <div className="absolute left-0 mt-2 w-40 bg-white dark:bg-gray-900 rounded shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition z-50">
+              <Link href="/writer" className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">Writer Home</Link>
+              <Link href="/writer/blog" className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">Blog Writer</Link>
+              <Link href="/writer/email" className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">Email Writer</Link>
+            </div>
+          </div>
+          {/* AI Study Dropdown */}
+          <div className="relative group">
+            <button className="px-3 py-1 rounded-md font-medium text-gray-800 dark:text-white group-hover:bg-purple-100 dark:group-hover:bg-purple-800/50 transition flex items-center">
+              AI Study <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+            </button>
+            <div className="absolute left-0 mt-2 w-40 bg-white dark:bg-gray-900 rounded shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition z-50">
+              <Link href="/study" className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">Study Home</Link>
+              <Link href="/study/flashcards" className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">Flashcards</Link>
+              <Link href="/study/notes" className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">Notes</Link>
+            </div>
+          </div>
+          {/* AI Tools Dropdown */}
+          <div className="relative group">
+            <button className="px-3 py-1 rounded-md font-medium text-gray-800 dark:text-white group-hover:bg-purple-100 dark:group-hover:bg-purple-800/50 transition flex items-center">
+              AI Tools <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+            </button>
+            <div className="absolute left-0 mt-2 w-40 bg-white dark:bg-gray-900 rounded shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition z-50">
+              <Link href="/tools" className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">Tools Home</Link>
+              <Link href="/tools/seo" className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">SEO Tools</Link>
+              <Link href="/tools/analytics" className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">Analytics</Link>
+            </div>
+          </div>
+          {/* AI Photo Dropdown */}
+          <div className="relative group">
+            <button className="px-3 py-1 rounded-md font-medium text-gray-800 dark:text-white group-hover:bg-purple-100 dark:group-hover:bg-purple-800/50 transition flex items-center">
+              AI Photo <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+            </button>
+            <div className="absolute left-0 mt-2 w-40 bg-white dark:bg-gray-900 rounded shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition z-50">
+              <Link href="/photo" className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">Photo Home</Link>
+              <Link href="/photo/edit" className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">Photo Editor</Link>
+              <Link href="/photo/generate" className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">Image Generator</Link>
+            </div>
+          </div>
+        </div>
+        {/* --- End AI Tools Nav Bar --- */}
+
         <div className="flex items-center space-x-4">
           <Link
             href="/login"
