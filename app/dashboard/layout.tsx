@@ -93,8 +93,8 @@ export default function DashboardLayout({
   // --- Effect to fetch chat title when on a chat page --- 
   useEffect(() => {
     const fetchChatTitle = async (chatId: string) => {
-      if (!user || !user.email) {
-         setCurrentChatTitle(null); // Clear title if no user
+      if (!user || !user.email || !db) {
+         setCurrentChatTitle(null); // Clear title if no user or db
          return;
       }
       const chatDocPath = `savedHistory/${user.email}/chats/${chatId}`;
@@ -224,9 +224,9 @@ export default function DashboardLayout({
               <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 px-3 pt-4">Menu</p>
               <nav className="space-y-1">
                 <Link
-                  href="/dashboard/new"
+                  href="/chat"
                   className={`flex items-center px-3 py-2 text-sm rounded-md ${ 
-                    pathname === "/dashboard/new" || pathname === "/dashboard"
+                    pathname === "/chat" || pathname === "/dashboard/new" || pathname === "/dashboard"
                       ? "bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                       : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                   }`}
@@ -283,7 +283,14 @@ export default function DashboardLayout({
           )}
 
           <div className="flex-1 flex flex-col overflow-hidden">
-            <DashboardHeader pageTitle={pageTitle} />
+            <DashboardHeader title={pageTitle}
+              onToggleHistory={handleToggleHistory}
+              onTogglePrompts={handleTogglePrompts}
+              onToggleTools={handleToggleTools}
+              showHistory={historyOpen}
+              showPrompts={isPromptsOpen}
+              showTools={isToolsOpen}
+            />
             <main className="flex-1 overflow-y-auto">
               {children}
             </main>

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect, useContext } from "react"
-import { useRouter } from 'next/navigation'; // Import useRouter
+import { useRouter, useSearchParams } from 'next/navigation'; // Import useRouter and useSearchParams
 import { useAuth } from "@/context/AuthContext"; // Import useAuth
 import { Paperclip, Globe, Send, Sparkles, BarChart2, ImageIcon, Calculator, Search, FileText, Settings2, RefreshCw, Copy, ThumbsUp, ThumbsDown, ArrowDown } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
@@ -32,6 +32,7 @@ export default function NewChatPage() {
   const { user, loading: authLoading } = useAuth(); // Get user and loading state
   const router = useRouter();
   const { setPromptSetter } = useContext(PromptPasteContext);
+  const searchParams = useSearchParams();
 
   // Simulate User Info (replace with actual auth context later)
   const userName = "User" // Fallback username
@@ -66,12 +67,22 @@ export default function NewChatPage() {
     return () => setPromptSetter(null);
   }, [setPromptSetter]);
 
+  useEffect(() => {
+    const initialPrompt = searchParams.get('initialPrompt');
+    if (initialPrompt) setPrompt(initialPrompt);
+  }, [searchParams]);
+
   const handleSend = async () => {
     if (!prompt.trim() || isLoading || !user || !user.email) {
       console.error("User or user email is not available.");
       alert("Error: User email not found. Cannot save chat.");
       setIsLoading(false); // Ensure loading state is reset
       return; 
+    }
+    if (!db) {
+      console.error("Firestore instance (db) is not available.");
+      setIsLoading(false);
+      return;
     }
 
     const currentPrompt = prompt.trim();
@@ -142,7 +153,6 @@ export default function NewChatPage() {
     <div className="flex min-h-screen w-full items-center justify-center">
       {/* Inner container for max-width and centering */}
       <div className="w-full max-w-3xl flex flex-col items-center">
-
         {/* 1. Greeting - Remains centered */}
         <h1 className="text-3xl font-medium mb-8 text-center">
           {greeting ? `${greeting}, ${user.displayName || userName}!` : `Hey there, ${user.displayName || userName}!`}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useContext } from "react";
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useParams, useRouter, useSearchParams, notFound } from 'next/navigation';
 import { useAuth } from "@/context/AuthContext";
 import { db } from "@/lib/firebase/config";
 import { doc, getDoc, updateDoc, arrayUnion, serverTimestamp, Timestamp, onSnapshot, collection, addDoc } from "firebase/firestore"; 
@@ -126,7 +126,17 @@ export default function ChatPage() {
   const userName = user?.displayName || "User";
   const userAvatar = user?.photoURL || "/placeholder.svg?height=40&width=40";
 
+  console.log('[ChatPage] Rendered with chatId:', chatId);
+
+  // Add a simple chatId validation: must be 20+ chars (Firestore doc IDs are 20 chars)
+  // You can adjust this check as needed for your app
+  if (!chatId || typeof chatId !== 'string' || chatId.length < 10 || chatId.length > 40 || chatId.includes('.')) {
+    console.warn('[ChatPage] Invalid chatId detected:', chatId, 'Showing 404.');
+    notFound();
+  }
+
   useEffect(() => {
+    console.log('[ChatPage] useEffect: user, chatId, router', user, chatId, router);
     const modelFromQuery = searchParams.get('model');
     if (modelFromQuery && AVAILABLE_MODELS.some(m => m.id === modelFromQuery)) {
       setSelectedModelId(modelFromQuery);
@@ -135,11 +145,17 @@ export default function ChatPage() {
   }, [searchParams]);
 
   useEffect(() => {
+    console.log('[ChatPage] useEffect: isFetchingChat, chatData, messages, initialPromptSent, searchParams', isFetchingChat, chatData, messages, initialPromptSent, searchParams);
     if (!user || !user.email || !chatId) {
       setIsFetchingChat(true); 
       return;
     }
     setIsFetchingChat(true);
+    if (!db) {
+      console.error("Firestore instance (db) is not available.");
+      setIsFetchingChat(false);
+      return;
+    }
     const chatDocPath = `savedHistory/${user.email}/chats/${chatId}`;
     const chatDocRef = doc(db, chatDocPath);
     const unsubscribe = onSnapshot(chatDocRef, (docSnap) => {
@@ -166,6 +182,7 @@ export default function ChatPage() {
 
   // --- Effect to send initial prompt if needed ---
   useEffect(() => {
+    console.log('[ChatPage] useEffect: isFetchingChat, chatData, messages, initialPromptSent, searchParams', isFetchingChat, chatData, messages, initialPromptSent, searchParams);
     if (!isFetchingChat && chatData && messages.length === 1 && messages[0].sender === 'user' && !initialPromptSent) {
       const initialUserPrompt = messages[0].text;
       const modelIdFromQuery = searchParams.get('model') || selectedModelId; // Use query param or state
@@ -179,10 +196,12 @@ export default function ChatPage() {
   // --- End Effect ---
 
   useEffect(() => {
+    console.log('[ChatPage] useEffect: messages changed', messages);
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   useEffect(() => {
+    console.log('[ChatPage] useEffect: setPromptSetter');
     setPromptSetter(setPrompt);
     return () => setPromptSetter(null);
   }, [setPromptSetter]);
@@ -215,6 +234,13 @@ export default function ChatPage() {
     if (!prompt.trim() || isLoading || !user || !user.email || !chatId) return;
     const userMessageText = prompt.trim();
     const userMessageForFirestore = { sender: "user", text: userMessageText, timestamp: Timestamp.now() };
+    if (!db) {
+      console.error("Firestore instance (db) is not available. Cannot save user message.");
+      setIsLoading(false); // Ensure loading is reset
+      // Optionally, add the message locally but indicate it's not saved
+      // setMessages(prev => [...prev, { ...userMessageForFirestore, id: Date.now() }]); // Example local add
+      return;
+    }
     const chatDocPath = `savedHistory/${user.email}/chats/${chatId}`;
     const chatDocRef = doc(db, chatDocPath);
     try {
@@ -292,15 +318,19 @@ export default function ChatPage() {
 
       // Update Firestore
       if (user?.email && chatId) {
-        const chatDocPath = `savedHistory/${user.email}/chats/${chatId}`;
-        const chatDocRef = doc(db, chatDocPath);
-        // Read the latest messages from Firestore to avoid race conditions if possible
-        // Or simply update the specific message if structure allows (more complex)
-        // For simplicity here, we'll update the whole array based on the *new* local state
-        const updatedFirestoreMessages = messages.map((msg, index) => 
-            index === aiMessageIndex ? updatedAiMessage : msg
-        );
-        await updateDoc(chatDocRef, { messages: updatedFirestoreMessages });
+        if (!db) {
+          console.error("Firestore instance (db) is not available. Cannot update regenerated message.");
+        } else {
+          const chatDocPath = `savedHistory/${user.email}/chats/${chatId}`;
+          const chatDocRef = doc(db, chatDocPath);
+          // Read the latest messages from Firestore to avoid race conditions if possible
+          // Or simply update the specific message if structure allows (more complex)
+          // For simplicity here, we'll update the whole array based on the *new* local state
+          const updatedFirestoreMessages = messages.map((msg, index) => 
+              index === aiMessageIndex ? updatedAiMessage : msg
+          );
+          await updateDoc(chatDocRef, { messages: updatedFirestoreMessages });
+        }
       }
     } catch (error) {
       console.error("Error regenerating AI response:", error);
@@ -326,6 +356,11 @@ export default function ChatPage() {
       return;
     }
 
+    if (!db) {
+      console.error("Firestore instance (db) is not available. Cannot save title.");
+      setIsTitleDialogOpen(false); // Close dialog
+      return;
+    }
     const chatDocPath = `savedHistory/${user.email}/chats/${chatId}`;
     const chatDocRef = doc(db, chatDocPath);
 
@@ -345,6 +380,11 @@ export default function ChatPage() {
     if (isLoading || !user || !user.email || !chatId) return; // Basic guards
     
     setIsLoading(true);
+    if (!db) {
+      console.error("Firestore instance (db) is not available. Cannot send initial prompt.");
+      setIsLoading(false);
+      return;
+    }
     const chatDocPath = `savedHistory/${user.email}/chats/${chatId}`;
     const chatDocRef = doc(db, chatDocPath);
     const initialModel = AVAILABLE_MODELS.find(m => m.id === modelId) || AVAILABLE_MODELS[0];
@@ -427,6 +467,10 @@ export default function ChatPage() {
           return; // Or show a message
       }
 
+      if (!db) {
+        console.error("Firestore instance (db) is not available. Cannot save prompt.");
+        return;
+      }
       const promptsCollectionPath = `savedHistory/${user.email}/prompts`;
       const promptsCollectionRef = collection(db, promptsCollectionPath);
 
@@ -446,7 +490,8 @@ export default function ChatPage() {
   // --- End Placeholder Handlers ---
 
   if (authLoading) {
-     return (
+    console.log('[ChatPage] authLoading');
+    return (
        <div className="flex flex-col h-full">
          <div className="flex-1 overflow-y-auto p-4 space-y-4">
            <ChatMessageSkeleton />
@@ -460,13 +505,14 @@ export default function ChatPage() {
   }
 
   if (!user || !user.email) {
-     console.log("Redirecting, user or email missing in render.");
-     router.push('/login');
-     return null;
+    console.log('[ChatPage] Redirecting, user or email missing in render.');
+    router.push('/login');
+    return null;
   }
 
    if (!chatData) {
-     return <div className="flex flex-grow items-center justify-center">Chat not found or access denied.</div>;
+     console.log('[ChatPage] No chatData found, showing error message.');
+     return <div className="flex flex-grow items-center justify-center">nora</div>;
    }
 
   return (

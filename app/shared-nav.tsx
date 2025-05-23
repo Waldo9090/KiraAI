@@ -4,11 +4,89 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useTheme } from "next-themes"
+import { ChevronDown } from "lucide-react"
+
+const NAV_ITEMS = [
+  {
+    label: "AI Chat",
+    dropdown: [
+      { label: "AI Chat", href: "/chat" },
+      { label: "Ask AI", href: "/chat/ask-ai" },
+      { label: "ChatGPT", href: "/chat/chatgpt" },
+      { label: "Ask GPT", href: "/chat/ask-gpt" },
+      { label: "Ask Gemini", href: "/chat/ask-gemini" },
+      { label: "Ask Qwen3", href: "/chat/ask-qwen3" },
+      { label: "Ask Claude", href: "/chat/ask-claude" },
+      { label: "Ask DeepSeek", href: "/chat/ask-deepseek" },
+    ],
+  },
+  {
+    label: "AI PDF",
+    dropdown: [
+      { label: "ChatPDF", href: "/pdf/chatpdf" },
+      { label: "Chat Doc", href: "/pdf/chat-doc" },
+      { label: "Chat PPT", href: "/pdf/chat-ppt" },
+      { label: "AI Scholar", href: "/pdf/ai-scholar" },
+      { label: "AI PDF OCR", href: "/pdf/ocr" },
+      { label: "AI PDF Viewer", href: "/pdf/viewer" },
+      { label: "AI PDF Insights", href: "/pdf/insights" },
+      { label: "AI PDF Reader", href: "/pdf/reader" },
+    ],
+  },
+  {
+    label: "AI YouTube",
+    dropdown: null,
+    href: "/youtube"
+  },
+  {
+    label: "AI Writer",
+    dropdown: [
+      { label: "AI Detector", href: "/writer/ai-detector" },
+      { label: "AI Paraphraser", href: "/writer/paraphraser" },
+      { label: "AI Humanizer", href: "/writer/humanizer" },
+      { label: "AI Bypass", href: "/writer/bypass" },
+      { label: "AI Story Generator", href: "/writer/story-generator" },
+      { label: "AI Email Writer", href: "/writer/email-writer" },
+      { label: "Love Message Generator", href: "/writer/love-message" },
+    ],
+  },
+  {
+    label: "AI Study",
+    dropdown: [
+      { label: "AI Translator", href: "/study/translator" },
+      { label: "Math Solver", href: "/study/math-solver" },
+      { label: "Flashcard Maker", href: "/study/flashcard-maker" },
+      { label: "Math Homework Assistant", href: "/study/math-homework" },
+      { label: "Physics Solver", href: "/study/physics-solver" },
+      { label: "Quiz Generator", href: "/study/quiz-generator" },
+    ],
+  },
+  {
+    label: "AI Tools",
+    dropdown: [
+      { label: "Image To Text", href: "/tools/image-to-text" },
+      { label: "Image Translator", href: "/tools/image-translator" },
+      { label: "Passport/ID Card Scanner", href: "/tools/id-scanner" },
+      { label: "AI Receipt & Invoice Scanner", href: "/tools/receipt-invoice-scanner" },
+    ],
+  },
+  {
+    label: "AI Photo",
+    dropdown: [
+      { label: "Convert to Studio Ghibili", href: "/photo/ghibli" },
+      { label: "Convert to Action Figure", href: "/photo/action-figure" },
+      { label: "Convert Pet to Human", href: "/photo/pet-to-human" },
+      { label: "Convert Photo to Watercolor", href: "/photo/watercolor" },
+      { label: "More Styles", href: "/photo/more-styles" },
+    ],
+  },
+];
 
 export default function SharedNav() {
   const [isScrolled, setIsScrolled] = useState(false)
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true)
@@ -22,6 +100,11 @@ export default function SharedNav() {
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
+
+  // Dropdown open/close handlers
+  const handleDropdown = (label: string) => {
+    setOpenDropdown(openDropdown === label ? null : label);
+  };
 
   return (
     <header
@@ -38,19 +121,48 @@ export default function SharedNav() {
             <span className="text-xl font-bold text-gray-800 dark:text-white">ChatAI</span>
           </Link>
 
-          <nav className="hidden md:flex items-center space-x-6">
-            {/* <Link href="/product" className="text-gray-700 dark:text-gray-200 hover:opacity-80">
-              Product
-            </Link> */}
-            <Link href="/pricing" className="text-gray-700 dark:text-gray-200 hover:opacity-80">
-              Pricing
-            </Link>
-            <Link href="/blogs" className="text-gray-700 dark:text-gray-200 hover:opacity-80">
-              Blog
-            </Link>
-            {/* <Link href="/chat" className="text-gray-700 dark:text-gray-200 hover:opacity-80">
-              Kira
-            </Link> */}
+          <nav className="hidden md:flex items-center space-x-8">
+            {NAV_ITEMS.map((item) => (
+              <div
+                key={item.label}
+                className="relative group"
+                onMouseEnter={() => setOpenDropdown(item.label)}
+                onMouseLeave={() => setOpenDropdown(null)}
+              >
+                {item.dropdown ? (
+                  <>
+                    <button
+                      className="flex items-center font-semibold text-lg text-gray-900 dark:text-white focus:outline-none group-hover:text-purple-700 transition"
+                      type="button"
+                    >
+                      {item.label}
+                      <ChevronDown className="ml-1 w-4 h-4" />
+                    </button>
+                    {/* Dropdown */}
+                    <div
+                      className={`absolute left-0 mt-2 min-w-[220px] bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-100 dark:border-gray-800 py-2 z-50 transition-all duration-150 ${openDropdown === item.label ? 'block' : 'hidden'}`}
+                    >
+                      {item.dropdown.map((sub) => (
+                        <Link
+                          key={sub.label}
+                          href={sub.href}
+                          className="block px-5 py-2 text-gray-800 dark:text-gray-100 hover:bg-purple-50 dark:hover:bg-gray-800 text-base whitespace-nowrap"
+                        >
+                          {sub.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <Link
+                    href={item.href || '#'}
+                    className="font-semibold text-lg text-gray-900 dark:text-white hover:text-purple-700 transition"
+                  >
+                    {item.label}
+                  </Link>
+                )}
+              </div>
+            ))}
           </nav>
         </div>
 
