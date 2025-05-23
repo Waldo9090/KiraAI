@@ -1,5 +1,4 @@
 import { Metadata } from 'next';
-import SharedNav from '../shared-nav';
 
 export const metadata: Metadata = {
   title: 'Blog Posts - ChatAI',
@@ -13,7 +12,6 @@ export default function BlogsLayout({
 }) {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">
-      <SharedNav />
       {children}
     </div>
   );
