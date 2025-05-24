@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { db } from '@/lib/firebase/config';
 import { collection, query, where, orderBy, onSnapshot, Timestamp } from 'firebase/firestore';
@@ -28,11 +28,12 @@ export default function ChatHistorySidebar({ selectedChatIds, onSelectionChange 
   const [chatHistory, setChatHistory] = useState<ChatHistoryItem[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
-    if (!user || !user.email) {
-      setIsLoadingHistory(false); // Stop loading if no user/email
-      setChatHistory([]); // Clear history if user logs out
+    if (!user || !user.email || !db) {
+      setChatHistory([]);
+      setIsLoadingHistory(false);
       return;
     }
 
@@ -92,8 +93,7 @@ export default function ChatHistorySidebar({ selectedChatIds, onSelectionChange 
 
   // New click handler function
   const handleChatClick = (chatId: string) => {
-    console.log(`Attempting to navigate to chat: ${chatId}`);
-    // No preventDefault needed, Link will handle navigation
+    router.push(`/chat/${chatId}`);
   };
 
   return (
@@ -111,42 +111,18 @@ export default function ChatHistorySidebar({ selectedChatIds, onSelectionChange 
         const isSelected = selectedChatIds.includes(chat.id);
 
         return (
-          <li key={chat.id} className="flex items-center gap-2 group rounded-md hover:bg-gray-100 dark:hover:bg-gray-800">
-            {/* Checkbox (outside the link) */}
-            <Checkbox
-              id={`select-${chat.id}`}
-              checked={isSelected}
-              onCheckedChange={(checked) => onSelectionChange(chat.id, !!checked)}
-              className={cn(
-                "ml-2 transition-opacity", // Slightly adjust positioning
-                isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-              )}
-              aria-label={`Select chat ${chatTitle}`}
-            />
-
-            {/* Link (now separate) */}
-            <Link
-              key={chat.id}
-              href={`/chat/${chat.id}`}
-              className={cn(
-                "block px-2 py-2 text-sm rounded-md transition-colors",
-                selectedChatIds.includes(chat.id)
-                  ? "bg-gray-100 dark:bg-gray-800"
-                  : "hover:bg-gray-50 dark:hover:bg-gray-800"
-              )}
-            >
-              {/* Icon (conditionally shown based on selection/hover) */}
-              <MessageSquare
-                 className={cn(
-                    "h-4 w-4 flex-shrink-0 text-gray-600 dark:text-gray-400 transition-opacity",
-                    isSelected ? "opacity-0" : "opacity-100 group-hover:opacity-0"
-                 )}
-              />
-              {/* Title (always visible) */}
-              <span className="truncate">
-                {chatTitle}
-              </span>
-            </Link>
+          <li
+            key={chat.id}
+            className={cn(
+              "flex items-center gap-2 px-2 py-2 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition group",
+              selectedChatIds.includes(chat.id) && "bg-gray-100 dark:bg-gray-800"
+            )}
+            onClick={() => handleChatClick(chat.id)}
+          >
+            <MessageSquare className="w-5 h-5 text-gray-400 flex-shrink-0" />
+            <span className="truncate flex-1 min-w-0 text-gray-900 dark:text-gray-100 text-base" title={chat.title}>
+              {chat.title}
+            </span>
           </li>
         );
       })}
