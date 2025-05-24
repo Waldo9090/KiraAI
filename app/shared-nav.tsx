@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useTheme } from "next-themes"
@@ -87,6 +87,7 @@ export default function SharedNav() {
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const navRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true)
@@ -101,10 +102,16 @@ export default function SharedNav() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  // Dropdown open/close handlers
-  const handleDropdown = (label: string) => {
-    setOpenDropdown(openDropdown === label ? null : label);
-  };
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (navRef.current && !navRef.current.contains(event.target as Node)) {
+        setOpenDropdown(null);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <header
@@ -112,7 +119,7 @@ export default function SharedNav() {
         isScrolled ? "bg-white/80 dark:bg-gray-900/90 backdrop-blur-md shadow-sm" : "bg-transparent dark:bg-black/90"
       }`}
     >
-      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+      <div ref={navRef} className="container mx-auto px-4 py-4 flex justify-between items-center">
         <div className="flex items-center space-x-8">
           <Link href="/" className="flex items-center">
             <div className="h-10 w-10 mr-2">
@@ -122,36 +129,47 @@ export default function SharedNav() {
           </Link>
 
           <nav className="hidden md:flex items-center space-x-8">
+            <Link
+              href="/blogs"
+              className="font-semibold text-lg text-gray-900 dark:text-white hover:text-purple-700 transition"
+            >
+              Blogs
+            </Link>
+            <Link
+              href="/pricing"
+              className="font-semibold text-lg text-gray-900 dark:text-white hover:text-purple-700 transition"
+            >
+              Pricing
+            </Link>
             {NAV_ITEMS.map((item) => (
-              <div
-                key={item.label}
-                className="relative group"
-                onMouseEnter={() => setOpenDropdown(item.label)}
-                onMouseLeave={() => setOpenDropdown(null)}
-              >
+              <div key={item.label} className="relative">
                 {item.dropdown ? (
                   <>
                     <button
-                      className="flex items-center font-semibold text-lg text-gray-900 dark:text-white focus:outline-none group-hover:text-purple-700 transition"
+                      className="flex items-center font-semibold text-lg text-gray-900 dark:text-white focus:outline-none transition"
                       type="button"
+                      onClick={() =>
+                        setOpenDropdown(openDropdown === item.label ? null : item.label)
+                      }
                     >
                       {item.label}
                       <ChevronDown className="ml-1 w-4 h-4" />
                     </button>
-                    {/* Dropdown */}
-                    <div
-                      className={`absolute left-0 mt-2 min-w-[220px] bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-100 dark:border-gray-800 py-2 z-50 transition-all duration-150 ${openDropdown === item.label ? 'block' : 'hidden'}`}
-                    >
-                      {item.dropdown.map((sub) => (
-                        <Link
-                          key={sub.label}
-                          href={sub.href}
-                          className="block px-5 py-2 text-gray-800 dark:text-gray-100 hover:bg-purple-50 dark:hover:bg-gray-800 text-base whitespace-nowrap"
-                        >
-                          {sub.label}
-                        </Link>
-                      ))}
-                    </div>
+                    {openDropdown === item.label && (
+                      <div
+                        className="absolute left-0 mt-2 min-w-[220px] bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-100 dark:border-gray-800 py-2 z-50 transition-all duration-150 block"
+                      >
+                        {item.dropdown.map((sub) => (
+                          <Link
+                            key={sub.label}
+                            href={sub.href}
+                            className="block px-5 py-2 text-gray-800 dark:text-gray-100 hover:bg-purple-50 dark:hover:bg-gray-800 text-base whitespace-nowrap"
+                          >
+                            {sub.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
                   </>
                 ) : (
                   <Link

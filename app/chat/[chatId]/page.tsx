@@ -202,7 +202,7 @@ export default function ChatPage() {
 
   useEffect(() => {
     console.log('[ChatPage] useEffect: setPromptSetter');
-    setPromptSetter(setPrompt);
+    setPromptSetter((prompt) => setPrompt(prompt));
     return () => setPromptSetter(null);
   }, [setPromptSetter]);
 

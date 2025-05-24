@@ -1,3 +1,4 @@
+import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { PlusCircle, History as HistoryIcon, MessageSquare, Wrench } from "lucide-react";
@@ -5,6 +6,7 @@ import { PlusCircle, History as HistoryIcon, MessageSquare, Wrench } from "lucid
 export default function AiToolsLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen bg-white dark:bg-gray-950">
+      {/* Sidebar */}
       <div className="w-60 bg-gray-50 dark:bg-gray-900 border-r dark:border-gray-800 flex flex-col h-full flex-shrink-0">
         <div className="p-4 flex items-center justify-between border-b dark:border-gray-800">
           <div className="flex items-center">
@@ -36,6 +38,7 @@ export default function AiToolsLayout({ children }: { children: React.ReactNode 
           </nav>
         </div>
       </div>
+      {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="flex items-center justify-between px-6 py-3 border-b dark:border-gray-800 h-16 flex-shrink-0 bg-white dark:bg-gray-950 sticky top-0 z-20">
           <span className="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate" title="AI Tools">AI Tools</span>

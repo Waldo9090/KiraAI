@@ -84,7 +84,7 @@ export default function PromptsPanel({ onClose, isStandalonePage = false }: Prom
   const router = useRouter();
 
   useEffect(() => {
-    if (activeTab !== 'saved' || !user || !user.email || !db) {
+    if (activeTab !== 'saved' || !user || !user.email) {
       setSavedPrompts([]);
       return;
     }
@@ -122,20 +122,13 @@ export default function PromptsPanel({ onClose, isStandalonePage = false }: Prom
   const isLoading = activeTab === 'saved' && isLoadingSaved;
 
   const handlePromptClick = (promptText: string) => {
+    // First paste the prompt using context
+    pastePrompt(promptText);
+    
+    // Then navigate to chat if not already there
     const currentPath = window.location.pathname;
-    if (currentPath === '/chat' || currentPath.startsWith('/chat/')) {
-      pastePrompt(promptText);
-      if (onClose) onClose();
-    } else {
-      router.push(`/chat?initialPrompt=${encodeURIComponent(promptText)}`);
-      if (onClose) onClose();
-    }
-  };
-
-  const handleSavedPromptClick = (prompt: SavedPrompt) => {
-    if (prompt.id) {
-      router.push(`/chat/${prompt.id}`);
-      if (onClose) onClose();
+    if (!currentPath.startsWith('/chat')) {
+      router.push('/chat');
     }
   };
 
@@ -217,7 +210,7 @@ export default function PromptsPanel({ onClose, isStandalonePage = false }: Prom
           <li key={prompt.id}>
              <button
                className="w-full text-left py-4 px-2 focus:outline-none hover:bg-gray-50 dark:hover:bg-gray-800 transition rounded-none"
-               onClick={() => handleSavedPromptClick(prompt)}
+               onClick={() => handlePromptClick(prompt.prompt)}
                title={prompt.prompt}
              >
                <div className="text-sm text-gray-800 dark:text-gray-200 mb-1 leading-snug truncate">{prompt.prompt}</div>
