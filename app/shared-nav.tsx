@@ -54,7 +54,7 @@ const NAV_ITEMS = [
     label: "AI Study",
     dropdown: [
       { label: "AI Translator", href: "/study/translator" },
-      { label: "Math Solver", href: "/study/math-solver" },
+      { label: "AI Math Solver", href: "/math-solver" },
       { label: "Flashcard Maker", href: "/study/flashcard-maker" },
       { label: "Math Homework Assistant", href: "/study/math-homework" },
       { label: "Physics Solver", href: "/study/physics-solver" },
