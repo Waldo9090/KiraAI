@@ -25,7 +25,7 @@ const NAV_ITEMS = [
     dropdown: [
       { label: "ChatPDF", href: "/pdf/chatpdf" },
       { label: "Chat Doc", href: "/pdf/chat-doc" },
-      { label: "Chat PPT", href: "/pdf/chat-ppt" },
+      { label: "Chat PPT", href: "/chatppt" },
       { label: "AI Scholar", href: "/pdf/ai-scholar" },
       { label: "AI PDF OCR", href: "/pdf/ocr" },
       { label: "AI PDF Viewer", href: "/pdf/viewer" },

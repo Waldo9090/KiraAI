@@ -56,35 +56,35 @@ const TOOLS = [
 export default function AiToolsPage() {
   // No historyOpen state, no HistoryPanel
   return (
-    <div className="flex min-h-screen bg-gray-50 pb-16">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-950 pb-16">
       {/* Only the sidebar from layout.tsx will be visible */}
       <div className="flex-1">
         <section className="text-center py-12 px-4">
-          <h1 className="text-5xl font-extrabold mb-2 text-gray-900">Free AI tools</h1>
-          <p className="text-xl text-gray-700 mb-8">Free AI Tools for Writing, Research, & More | Merlin AI</p>
+          <h1 className="text-5xl font-extrabold mb-2 text-gray-900 dark:text-gray-100">Free AI tools</h1>
+          <p className="text-xl text-gray-700 dark:text-gray-300 mb-8">Free AI Tools for Writing, Research, & More | Merlin AI</p>
           <div className="max-w-xl mx-auto mb-8">
             <Input
               type="text"
               placeholder="Search for AI tools..."
-              className="w-full h-12 px-4 rounded-lg border border-gray-200 shadow-sm focus:ring-2 focus:ring-purple-300 text-base"
+              className="w-full h-12 px-4 rounded-lg border border-gray-200 shadow-sm focus:ring-2 focus:ring-purple-300 text-base bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700"
             />
           </div>
         </section>
         <section className="max-w-5xl mx-auto px-4">
-          <h2 className="text-2xl font-bold text-center mb-6 flex items-center justify-center gap-4">
-            <span className="flex-1 border-t border-gray-200" />
+          <h2 className="text-2xl font-bold text-center mb-6 flex items-center justify-center gap-4 text-gray-900 dark:text-gray-100">
+            <span className="flex-1 border-t border-gray-200 dark:border-gray-800" />
             <span>Trending Tools</span>
-            <span className="flex-1 border-t border-gray-200" />
+            <span className="flex-1 border-t border-gray-200 dark:border-gray-800" />
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {TOOLS.map((tool) => (
               <Link
                 key={tool.name}
                 href={tool.href}
-                className="bg-white rounded-2xl shadow p-6 hover:shadow-lg border border-gray-100 transition block"
+                className="bg-white rounded-2xl shadow p-6 hover:shadow-lg border border-gray-100 transition block dark:bg-gray-900 dark:border-gray-800 dark:text-gray-100"
               >
-                <h3 className="font-semibold text-lg mb-2">{tool.name}</h3>
-                <p className="text-gray-700 text-base">{tool.description}</p>
+                <h3 className="font-semibold text-lg mb-2 text-gray-900 dark:text-gray-100">{tool.name}</h3>
+                <p className="text-gray-700 dark:text-gray-300 text-base">{tool.description}</p>
               </Link>
             ))}
           </div>

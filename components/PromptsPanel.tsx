@@ -8,7 +8,7 @@ import { db } from "@/lib/firebase/config";
 import { collection, query, onSnapshot, orderBy, Timestamp } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 const COMMUNITY_PROMPTS = [
   {
@@ -82,9 +82,10 @@ export default function PromptsPanel({ onClose, isStandalonePage = false }: Prom
   const { user } = useAuth();
   const { pastePrompt } = useContext(PromptPasteContext);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
-    if (activeTab !== 'saved' || !user || !user.email) {
+    if (activeTab !== 'saved' || !user || !user.email || !db) {
       setSavedPrompts([]);
       return;
     }
@@ -122,13 +123,22 @@ export default function PromptsPanel({ onClose, isStandalonePage = false }: Prom
   const isLoading = activeTab === 'saved' && isLoadingSaved;
 
   const handlePromptClick = (promptText: string) => {
-    // First paste the prompt using context
-    pastePrompt(promptText);
-    
-    // Then navigate to chat if not already there
-    const currentPath = window.location.pathname;
-    if (!currentPath.startsWith('/chat')) {
-      router.push('/chat');
+    if (pathname.startsWith("/dashboard/chat/") || pathname.startsWith("/chat/") || pathname === "/dashboard/new" || pathname === "/chat") {
+      console.log("[PromptsPanel] Pasting prompt for chat page:", promptText);
+      pastePrompt(promptText);
+    } else {
+      console.log("[PromptsPanel] Navigating to /chat with initialPrompt:", promptText);
+      router.push(`/chat?initialPrompt=${encodeURIComponent(promptText)}`);
+    }
+  };
+
+  const handleSavedPromptClick = (prompt: SavedPrompt) => {
+    if (pathname.startsWith("/dashboard/chat/") || pathname.startsWith("/chat/") || pathname === "/dashboard/new" || pathname === "/chat") {
+      console.log("[PromptsPanel] Pasting saved prompt for chat page:", prompt.prompt);
+      pastePrompt(prompt.prompt);
+    } else {
+      console.log("[PromptsPanel] Navigating to /chat with initialPrompt (saved):", prompt.prompt);
+      router.push(`/chat?initialPrompt=${encodeURIComponent(prompt.prompt)}`);
     }
   };
 
@@ -210,7 +220,7 @@ export default function PromptsPanel({ onClose, isStandalonePage = false }: Prom
           <li key={prompt.id}>
              <button
                className="w-full text-left py-4 px-2 focus:outline-none hover:bg-gray-50 dark:hover:bg-gray-800 transition rounded-none"
-               onClick={() => handlePromptClick(prompt.prompt)}
+               onClick={() => handleSavedPromptClick(prompt)}
                title={prompt.prompt}
              >
                <div className="text-sm text-gray-800 dark:text-gray-200 mb-1 leading-snug truncate">{prompt.prompt}</div>

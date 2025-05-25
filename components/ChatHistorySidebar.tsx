@@ -119,10 +119,12 @@ export default function ChatHistorySidebar({ selectedChatIds, onSelectionChange 
             )}
             onClick={() => handleChatClick(chat.id)}
           >
-            <MessageSquare className="w-5 h-5 text-gray-400 flex-shrink-0" />
-            <span className="truncate flex-1 min-w-0 text-gray-900 dark:text-gray-100 text-base" title={chat.title}>
-              {chat.title}
-            </span>
+            <div className="flex items-center gap-2 w-full min-w-0">
+              <MessageSquare className="w-5 h-5 text-gray-400 flex-shrink-0" />
+              <span className="truncate flex-1 min-w-0 text-gray-900 dark:text-gray-100 text-base" title={chat.title}>
+                {chat.title}
+              </span>
+            </div>
           </li>
         );
       })}

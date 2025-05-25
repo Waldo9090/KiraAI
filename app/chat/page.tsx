@@ -63,7 +63,7 @@ export default function NewChatPage() {
 
   // Register prompt setter when component mounts
   useEffect(() => {
-    setPromptSetter(setPrompt);
+    setPromptSetter((prompt) => setPrompt(prompt));
     return () => setPromptSetter(null);
   }, [setPromptSetter]);
 

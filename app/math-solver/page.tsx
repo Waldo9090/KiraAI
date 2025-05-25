@@ -65,6 +65,10 @@ export default function MathSolverPage() {
       router.push("/login");
       return;
     }
+    if (!db) {
+      setError("Database is not available. Please try again later.");
+      return;
+    }
     setLoading(true);
     try {
       // 1. Create a new chat document in Firestore
